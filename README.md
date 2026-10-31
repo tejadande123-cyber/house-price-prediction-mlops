@@ -1,53 +1,40 @@
 # House Price Prediction Using MLOps
 
-## Project Information
+An end-to-end Machine Learning project that predicts house prices from four input features and demonstrates a basic MLOps workflow using **Pandas, Scikit-learn, MLflow, Joblib, Git and FastAPI**.
 
--   **Name:** Dande Teja
--   **Employee Code:** 8276
--   **District:** Namakkal
--   **Project:** House Price Prediction Using MLOps
--   **GitHub Repository:**
-    https://github.com/tejadande123-cyber/house-price-prediction-mlops
+## Project Objective
 
-## 1. Project Overview
+The model predicts a house price using:
 
-This project implements a simple end-to-end Machine Learning and MLOps
-workflow for house price prediction.
+- `area_sqft` - house area in square feet
+- `bedrooms` - number of bedrooms
+- `bathrooms` - number of bathrooms
+- `house_age` - age of the house in years
 
-The application predicts the price of a house using:
+The target variable is:
 
--   House area in square feet
--   Number of bedrooms
--   Number of bathrooms
--   Age of the house
+- `price` - house price in INR
 
-A **Linear Regression** model is trained using Scikit-learn. The
-experiment is tracked with **MLflow**, the trained model is saved using
-**Joblib**, the source code is versioned using **Git/GitHub**, and the
-model is deployed as a REST API using **FastAPI**.
+## MLOps Workflow
 
-## 2. Problem Statement
+```mermaid
+flowchart LR
+    A[Generate Dataset] --> B[Validate Data]
+    B --> C[Select X and y]
+    C --> D[80% Train / 20% Test]
+    D --> E[Train Linear Regression]
+    E --> F[Generate Predictions]
+    F --> G[MAE / RMSE / R2]
+    G --> H[MLflow Tracking]
+    G --> I[Save Model with Joblib]
+    H --> J[FastAPI Deployment]
+    I --> J
+    J --> K[Swagger UI Testing]
+```
 
-A real estate company wants to develop a Machine Learning application
-that predicts the price of a house based on its size, number of
-bedrooms, number of bathrooms and age of the property.
+## Project Structure
 
-The objective of this practical is to build a simple Machine Learning
-model and implement an MLOps workflow to:
-
-1.  Prepare the dataset
-2.  Preprocess the data
-3.  Train a Linear Regression model
-4.  Evaluate the model
-5.  Track experiments using MLflow
-6.  Save the trained model
-7.  Maintain the source code using Git
-8.  Deploy the model using FastAPI
-9.  Test the prediction API using Swagger UI
-
-## 3. Project Structure
-
-``` text
+```text
 house-price-prediction-mlops/
 |
 +-- data/
@@ -64,44 +51,31 @@ house-price-prediction-mlops/
 +-- README.md
 ```
 
-## 4. Dataset
+## 1. Dataset Preparation
 
-The dataset is stored in:
+The dataset is stored in `data/house_prices.csv`.
 
-``` text
-data/house_prices.csv
-```
+The five illustrative records supplied in the assignment are retained, and the program generates **995 additional synthetic records**, producing **1,000 records** in total.
 
-It contains the following columns:
+The dataset contains:
 
-  Column        Description
-  ------------- --------------------------------------
-  `area_sqft`   House area in square feet
-  `bedrooms`    Number of bedrooms
-  `bathrooms`   Number of bathrooms
-  `house_age`   Age of the house in years
-  `price`       House price in INR - target variable
+| Column | Description |
+|---|---|
+| `area_sqft` | House area in square feet |
+| `bedrooms` | Number of bedrooms |
+| `bathrooms` | Number of bathrooms |
+| `house_age` | Age of the house in years |
+| `price` | House price in INR |
 
-The five illustrative records given in the assignment are retained:
+The dataset generation script also:
 
-    Area   Bedrooms   Bathrooms   Age   Price (INR)
-  ------ ---------- ----------- ----- -------------
-    1000          2           1     5     3,500,000
-    1500          3           2     3     5,500,000
-    2000          3           2     8     6,500,000
-    2500          4           3     2     9,500,000
-    1200          2           2    10     3,800,000
+- displays the first five records;
+- checks missing values;
+- prints dataset statistics.
 
-The program generates **995 additional synthetic records**, resulting in
-a total of **1,000 records**.
+### Synthetic price logic
 
-The synthetic data is used only for this learning exercise.
-
-### Synthetic Price Logic
-
-The generated price follows a simple assumed relationship:
-
-``` python
+```python
 price = (
     500000
     + 2800 * area_sqft
@@ -112,58 +86,29 @@ price = (
 )
 ```
 
-Random noise is added to create variation in the synthetic dataset.
+This is a synthetic relationship created for the practical exercise and is not a real-world property valuation formula.
 
-## 5. Task 1 - Dataset Preparation
+## 2. Data Preprocessing
 
-The dataset is created in `generate_data.py`.
+The model uses four independent variables and one target variable.
 
-Important operations:
-
-``` python
-OUTPUT = Path("data/house_prices.csv")
-df.to_csv(OUTPUT, index=False)
-
-print(df.head())
-print(df.isnull().sum())
-```
-
-This completes the required activities:
-
--   Create `house_prices.csv`
--   Load/process data using Pandas
--   Display the first five records
--   Check missing values
-
-## 6. Task 2 - Data Preprocessing
-
-The independent variables are:
-
-``` python
+```python
 FEATURES = [
     "area_sqft",
     "bedrooms",
     "bathrooms",
     "house_age"
 ]
-```
 
-The target variable is:
-
-``` python
 TARGET = "price"
-```
 
-The data is separated into `X` and `y`:
-
-``` python
 X = df[FEATURES]
 y = df[TARGET]
 ```
 
-The dataset is split into **80% training** and **20% testing**:
+The dataset is split into **80% training data** and **20% testing data**.
 
-``` python
+```python
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -174,163 +119,111 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 For 1,000 records:
 
--   Training records: **800**
--   Testing records: **200**
+- Training records: **800**
+- Testing records: **200**
 
-## 7. Task 3 - Model Development
+## 3. Linear Regression Model
 
-A Linear Regression model is used:
+The model is created, trained and used for prediction as follows:
 
-``` python
+```python
 model = LinearRegression()
 model.fit(X_train, y_train)
 predictions = model.predict(X_test)
 ```
 
-The model is evaluated using:
+## 4. Model Evaluation
 
--   MAE - Mean Absolute Error
--   RMSE - Root Mean Squared Error
--   R2 - R-Squared Score
+The implementation calculates:
 
-``` python
+- **MAE** - Mean Absolute Error
+- **RMSE** - Root Mean Squared Error
+- **R2** - R-Squared Score
+
+```python
 mae = mean_absolute_error(y_test, predictions)
 mse = mean_squared_error(y_test, predictions)
 rmse = np.sqrt(mse)
 r2 = r2_score(y_test, predictions)
 ```
 
-### Obtained Results
+### Result from the completed run
 
-  Metric             Result
-  -------- ----------------
-  MAE        INR 316,895.84
-  RMSE       INR 402,549.35
-  R2                 0.9805
+| Metric | Result |
+|---|---:|
+| MAE | INR 316,895.84 |
+| RMSE | INR 402,549.35 |
+| R2 | 0.9805 |
 
-The R2 value is approximately **0.98** for this synthetic exercise
-dataset.
+### Successful training pipeline
 
-## 8. Task 4 - Experiment Tracking with MLflow
+![Successful training pipeline](images/1.png)
 
-The MLflow experiment is created with the name:
+## 5. MLflow Experiment Tracking
 
-``` text
+The MLflow experiment is named:
+
+```text
 House Price Prediction
 ```
 
-The experiment is initialized using:
+The training run records model configuration, dataset split information, evaluation metrics and the trained model artifact.
 
-``` python
+```python
 mlflow.set_experiment(EXPERIMENT_NAME)
+
+with mlflow.start_run(run_name="Linear_Regression_Run"):
+    mlflow.log_param("model_type", "Linear Regression")
+    mlflow.log_param("test_size", TEST_SIZE)
+    mlflow.log_param("random_state", RANDOM_STATE)
+    mlflow.log_param("total_records", len(df))
+    mlflow.log_param("training_records", len(X_train))
+    mlflow.log_param("testing_records", len(X_test))
+    mlflow.log_param("feature_count", len(FEATURES))
+
+    mlflow.log_metric("mae", mae)
+    mlflow.log_metric("rmse", rmse)
+    mlflow.log_metric("r2", r2)
 ```
 
-The run name is:
+### MLflow parameters and model artifact
 
-``` text
-Linear_Regression_Run
-```
+![MLflow run overview](images/6.png)
 
-### Parameters Logged
+### MLflow evaluation metrics
 
-The following parameters are recorded:
+![MLflow model metrics](images/5.png)
 
--   Model type
--   Test size
--   Random state
--   Total records
--   Training records
--   Testing records
--   Feature count
+## 6. Model Persistence with Joblib
 
-``` python
-mlflow.log_param("model_type", "Linear Regression")
-mlflow.log_param("test_size", TEST_SIZE)
-mlflow.log_param("random_state", RANDOM_STATE)
-mlflow.log_param("total_records", len(df))
-mlflow.log_param("training_records", len(X_train))
-mlflow.log_param("testing_records", len(X_test))
-mlflow.log_param("feature_count", len(FEATURES))
-```
+The trained model is stored in:
 
-### Metrics Logged
-
-``` python
-mlflow.log_metric("mae", mae)
-mlflow.log_metric("rmse", rmse)
-mlflow.log_metric("r2", r2)
-```
-
-### Model Artifact
-
-The trained Scikit-learn model is also logged to MLflow:
-
-``` python
-mlflow.sklearn.log_model(
-    sk_model=model,
-    name="house_price_model"
-)
-```
-
-To view the MLflow interface:
-
-``` bash
-mlflow ui
-```
-
-Open:
-
-``` text
-http://127.0.0.1:5000
-```
-
-## 9. Task 5 - Model Versioning
-
-### Joblib Model Saving
-
-The trained model is saved as:
-
-``` text
+```text
 models/house_model.joblib
 ```
 
-using:
+```python
+MODEL_PATH.parent.mkdir(
+    parents=True,
+    exist_ok=True
+)
 
-``` python
-MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 joblib.dump(model, MODEL_PATH)
 ```
 
-This saved model can be reused by the API without retraining the model
-every time.
+Saving the model allows the API to reuse the trained model without retraining it for every prediction.
 
-### Git and GitHub
+## 7. FastAPI Deployment
 
-Git is used for source-code version control.
+The saved model is loaded by the API:
 
-GitHub repository:
-
-**https://github.com/tejadande123-cyber/house-price-prediction-mlops**
-
-Typical Git workflow:
-
-``` bash
-git add .
-git commit -m "Update House Price Prediction MLOps project"
-git push
-```
-
-## 10. Task 6 - Model Deployment with FastAPI
-
-The trained Joblib model is loaded by `api.py`:
-
-``` python
+```python
 model = joblib.load(MODEL_PATH)
 ```
 
-The input structure is:
+The API accepts:
 
-``` python
+```python
 class HouseInput(BaseModel):
     area_sqft: float
     bedrooms: int
@@ -340,13 +233,7 @@ class HouseInput(BaseModel):
 
 The prediction endpoint is:
 
-``` text
-POST /predict
-```
-
-Main prediction logic:
-
-``` python
+```python
 @app.post("/predict")
 def predict(house: HouseInput):
     row = pd.DataFrame(
@@ -362,23 +249,21 @@ def predict(house: HouseInput):
     }
 ```
 
-## 11. API Testing with Swagger UI
+## 8. Swagger UI Testing
 
-Start FastAPI using:
+The FastAPI application provides automatically generated Swagger documentation.
 
-``` bash
-uvicorn api:app --reload
-```
+### Available API endpoints
 
-Open Swagger UI:
+![FastAPI Swagger UI](images/2.png)
 
-``` text
-http://127.0.0.1:8000/docs
-```
+### Prediction request
 
-Example request:
+![Prediction request](images/3.png)
 
-``` json
+Example input:
+
+```json
 {
   "area_sqft": 1500,
   "bedrooms": 3,
@@ -387,20 +272,17 @@ Example request:
 }
 ```
 
-The tested API returned a successful HTTP **200** response:
+### Prediction response
 
-``` json
-{
-  "predicted_price": 5823005.79,
-  "currency": "INR"
-}
-```
+![Successful prediction response](images/4.png)
 
-## 12. Dependencies
+The test returned an HTTP **200** response with a predicted house price.
+
+## 9. Dependencies
 
 The project uses:
 
-``` text
+```text
 numpy
 pandas
 scikit-learn
@@ -410,127 +292,72 @@ fastapi
 uvicorn
 ```
 
-Install them using:
+Install all dependencies using:
 
-``` bash
+```bash
 python -m pip install -r requirements.txt
 ```
 
-## 13. How to Run the Complete Project
+## 10. Running the Project
 
-### Step 1 - Install dependencies
+### Generate the dataset
 
-``` bash
-python -m pip install -r requirements.txt
-```
-
-### Step 2 - Generate dataset
-
-``` bash
+```bash
 python generate_data.py
 ```
 
-### Step 3 - Train and evaluate the model
+### Train and evaluate the model
 
-``` bash
+```bash
 python train.py
 ```
 
-### Step 4 - View MLflow experiment
+### Start MLflow
 
-``` bash
+```bash
 mlflow ui
 ```
 
-Open:
+MLflow is available locally at:
 
-``` text
+```text
 http://127.0.0.1:5000
 ```
 
-### Step 5 - Start FastAPI
+### Start FastAPI
 
-``` bash
+```bash
 uvicorn api:app --reload
 ```
 
-### Step 6 - Test using Swagger UI
+Swagger UI is available locally at:
 
-Open:
-
-``` text
+```text
 http://127.0.0.1:8000/docs
 ```
 
-Use `POST /predict`, enter the house details and execute the request.
+## Workflow Summary
 
-## 14. MLOps Workflow
-
-``` text
-Dataset Generation
-        |
-        v
-Data Validation
-        |
-        v
-Feature / Target Selection
-        |
-        v
-80% Training / 20% Testing
-        |
-        v
-Linear Regression Training
-        |
-        v
-Model Prediction
-        |
-        v
-MAE / RMSE / R2 Evaluation
-        |
-        +----------------------+
-        |                      |
-        v                      v
-MLflow Tracking          Joblib Model Saving
-        |                      |
-        +-----------+----------+
-                    |
-                    v
-              FastAPI Deployment
-                    |
-                    v
-              Swagger UI Testing
+```mermaid
+flowchart TD
+    A[house_prices.csv] --> B[Pandas Data Loading]
+    B --> C{Data Validation}
+    C -->|Valid| D[Feature / Target Selection]
+    D --> E[Train-Test Split]
+    E --> F[Linear Regression]
+    F --> G[Predictions]
+    G --> H[Evaluation]
+    H --> I[MLflow]
+    H --> J[Joblib]
+    J --> K[FastAPI]
+    I --> K
+    K --> L[Swagger Test]
 ```
 
-## 15. Conclusion
+## Conclusion
 
-This project demonstrates a complete basic MLOps workflow for a house
-price prediction application.
+This project demonstrates a complete basic MLOps workflow:
 
-The practical covers:
+**Data generation -> validation -> preprocessing -> model training -> evaluation -> experiment tracking -> model persistence -> API deployment -> API testing.**
 
--   Dataset creation
--   Pandas-based data handling
--   Missing-value checking
--   Feature and target selection
--   Train-test splitting
--   Linear Regression
--   Model evaluation
--   MLflow experiment tracking
--   Model artifact logging
--   Joblib model persistence
--   Git/GitHub version control
--   FastAPI deployment
--   Swagger UI testing
-
-The model achieved an R2 score of approximately **0.98** on the
-synthetic exercise dataset. Since the dataset and price relationship are
-synthetic, the result is intended to demonstrate the Machine Learning
-and MLOps workflow rather than provide real-world property valuations.
-
-------------------------------------------------------------------------
-
-**Submitted by:** Dande Teja\
-**Employee Code:** 8276\
-**District:** Namakkal\
-**GitHub:**
-https://github.com/tejadande123-cyber/house-price-prediction-mlops
+The model achieved an R2 score of approximately **0.98** on the synthetic exercise dataset. Because the dataset is synthetic, the result demonstrates the workflow rather than real-world property valuation performance.
