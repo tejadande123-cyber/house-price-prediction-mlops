@@ -157,7 +157,7 @@ r2 = r2_score(y_test, predictions)
 
 ### Successful training pipeline
 
-![Successful training pipeline](images/1.png)
+![Successful training pipeline](Screenshots/1.png)
 
 ## 5. MLflow Experiment Tracking
 
@@ -188,11 +188,11 @@ with mlflow.start_run(run_name="Linear_Regression_Run"):
 
 ### MLflow parameters and model artifact
 
-![MLflow run overview](images/6.png)
+![MLflow run overview](Screenshots/6.png)
 
 ### MLflow evaluation metrics
 
-![MLflow model metrics](images/5.png)
+![MLflow model metrics](Screenshots/5.png)
 
 ## 6. Model Persistence with Joblib
 
@@ -255,11 +255,11 @@ The FastAPI application provides automatically generated Swagger documentation.
 
 ### Available API endpoints
 
-![FastAPI Swagger UI](images/2.png)
+![FastAPI Swagger UI](Screenshots/2.png)
 
 ### Prediction request
 
-![Prediction request](images/3.png)
+![Prediction request](Screenshots/3.png)
 
 Example input:
 
@@ -274,7 +274,7 @@ Example input:
 
 ### Prediction response
 
-![Successful prediction response](images/4.png)
+![Successful prediction response](Screenshots/4.png)
 
 The test returned an HTTP **200** response with a predicted house price.
 
